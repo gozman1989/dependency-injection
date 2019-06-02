@@ -1,9 +1,11 @@
 package ioc;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public class ClassGeneration {
 
@@ -28,7 +30,25 @@ public class ClassGeneration {
         return constructor.newInstance(params);
     }
 
-    public Constructor getConstructorWithAnnotation(Class clazz, Class<Autowired> autowiredClass) {
-        List<Constructor>
+    public Optional<Constructor> getConstructorWithAnnotation(Class clazz, Class autowiredClass) {
+        Constructor[] constructors = clazz.getDeclaredConstructors();
+        return Arrays
+        		.stream(constructors)
+        		.filter(c->hasAnnotation(c, autowiredClass))
+        		.findFirst();
     }
+    
+    public boolean hasAnnotation(Constructor constructor, Class autowiredClass) {
+		Annotation annotation = constructor.getDeclaredAnnotation(autowiredClass);
+		return annotation!=null;
+	}
+
+	public Constructor getNoArgsCons(Class clazz) {
+		 Constructor[] constructors = clazz.getDeclaredConstructors();
+		 return Arrays
+	        		.stream(constructors)
+	        		.filter(c->c.getParameterCount()==0)
+	        		.findFirst()
+	        		.get();
+	}
 }
